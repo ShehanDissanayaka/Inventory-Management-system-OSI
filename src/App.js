@@ -12,7 +12,6 @@ function App() {
           <Route path="/" element={<StockControl />} />
           <Route path="/stockcontrol" element={<StockControl />} />
           <Route path="/groupmaster" element={<GroupMaster />} />
-          <Route path="/gascasc" element={<GroupMaster />} />
         </Routes>
       </div>
     </Router>
