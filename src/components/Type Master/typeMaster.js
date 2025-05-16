@@ -1,4 +1,7 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+// src/components/TypeMaster.js
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../../api/axios"; // Use your axios instance
 import "./typeMaster.css";
 
 const TypeMaster = () => {
@@ -6,21 +9,62 @@ const TypeMaster = () => {
   const [typeDescription, setTypeDescription] = useState("");
   const [search, setSearch] = useState("");
   const [searchBy, setSearchBy] = useState("code");
+  const [types, setTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const searchInputRef = useRef(null);
+  const navigate = useNavigate();
 
-  const handleSave = useCallback(() => {
-    console.log("Saved:", { typeCode, typeDescription });
-    alert("Type saved successfully!");
-    setTypeCode("");
-    setTypeDescription("");
-  }, [typeCode, typeDescription]);
+  // 🔧 Fetch Types from API
+  const fetchTypes = useCallback(async () => {
+  try {
+    const response = await axios.get("/api/stockcontrol/typemaster/");
+    setTypes(response.data);
+  } catch (error) {
+    console.error("Error fetching type data:", error);
+    alert("Error fetching type data. Please try again later.");
+  }
+}, []);
 
+
+  // 🔧 Save Type to API
+  const handleSave = useCallback(async () => {
+    if (!typeCode.trim() || !typeDescription.trim()) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/stockcontrol/typemaster/", {
+        TYPE_code: typeCode, 
+        TYPE_description: typeDescription,
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        alert("✅ Type saved successfully!");
+        setTypeCode("");
+        setTypeDescription("");
+        fetchTypes();
+      }
+    } catch (err) {
+      console.error("❌ Error saving type:", err);
+      alert("Failed to save type. Please try again.");
+    }
+  }, [typeCode, typeDescription, fetchTypes]);
+
+  // 🔧 Clear Form Fields
   const handleNew = useCallback(() => {
     setTypeCode("");
     setTypeDescription("");
   }, []);
 
+  // 🔧 Load Types on Mount
+  useEffect(() => {
+    fetchTypes();
+  }, [fetchTypes]);
+
+  // 🔧 Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key.toLowerCase() === "s") {
@@ -34,17 +78,26 @@ const TypeMaster = () => {
         searchInputRef.current?.focus();
       } else if (e.key === "Escape") {
         e.preventDefault();
-        window.close(); // Use a custom close handler if needed
+        navigate("/");
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSave, handleNew]);
+  }, [handleSave, handleNew, navigate]);
+
+  // 🔧 Filtered Types (Memoized for Performance)
+  const filteredTypes = useMemo(() => {
+    return types.filter((type) =>
+      searchBy === "code"
+        ? type.TYPE_code?.toLowerCase().includes(search.toLowerCase())
+        : type.TYPE_description?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [types, search, searchBy]);
 
   return (
     <div className="type-master-container">
-      <div className="title">Type Master</div>
+      <h2 className="title">Type Master</h2>
 
       <div className="type-master-section">
         <h3>Type Master Details</h3>
@@ -54,6 +107,7 @@ const TypeMaster = () => {
             type="text"
             value={typeCode}
             onChange={(e) => setTypeCode(e.target.value)}
+            placeholder="Enter Type Code"
           />
         </div>
         <div className="form-row">
@@ -62,12 +116,12 @@ const TypeMaster = () => {
             rows="3"
             value={typeDescription}
             onChange={(e) => setTypeDescription(e.target.value)}
-            style={{ resize: "vertical", width: "75%" }}
+            placeholder="Enter Type Description"
           ></textarea>
         </div>
         <div className="button-row">
-          <button onClick={handleSave}>Save</button>
-          <button onClick={handleNew}>New</button>
+          <button onClick={handleSave} className="save-btn">Save</button>
+          <button onClick={handleNew} className="new-btn">New</button>
         </div>
       </div>
 
@@ -84,30 +138,44 @@ const TypeMaster = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             ref={searchInputRef}
+            placeholder="Search Types"
           />
         </div>
 
         <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Type Code</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Replace this with dynamic rendering */}
-              <tr>
-                <td>001</td>
-                <td>Sample Type</td>
-              </tr>
-            </tbody>
-          </table>
+          {loading ? (
+            <p>Loading types...</p>
+          ) : error ? (
+            <p className="error-message">{error}</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Type Code</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTypes.length > 0 ? (
+                  filteredTypes.map((type) => (
+                    <tr key={type.id}>
+                      <td>{type.TYPE_code}</td>
+                      <td>{type.TYPE_description}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2">No matching types found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
       <div className="footer-hint">
-        Save = Ctrl+S | New = Ctrl+N | Focus Search = F2 | Exit = Esc
+        <strong>Save = Ctrl+S | New = Ctrl+N | Focus Search = F2 | Exit = Esc</strong>
       </div>
     </div>
   );

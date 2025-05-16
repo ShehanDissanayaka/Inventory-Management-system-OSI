@@ -1,7 +1,7 @@
 // src/components/GroupMaster.js
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../api/axios";
 import "./groupMaster.css";
 
 const GroupMaster = () => {
@@ -10,23 +10,25 @@ const GroupMaster = () => {
   const [search, setSearch] = useState("");
   const [searchBy, setSearchBy] = useState("code");
   const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const searchInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch Groups from API
+  // 🔧 Fetch Groups from API
   const fetchGroups = useCallback(async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/api/groupmaster/");
-      setGroups(response.data);
-      console.log("Groups fetched successfully:", response.data);
-    } catch (error) {
-      console.error("Error fetching group data:", error);
-      alert("Error fetching group data.");
-    }
-  }, []);
+  try {
+    const response = await axios.get("/api/stockcontrol/groupmaster/");
+    setGroups(response.data);
+  } catch (error) {
+    console.error("Error fetching group data:", error);
+    alert("Error fetching group data. Please try again later.");
+  }
+}, []);
 
-  // Save Group to API
+
+  // 🔧 Save Group to API
   const handleSave = useCallback(async () => {
     if (!groupCode.trim() || !groupDescription.trim()) {
       alert("Please fill in all fields.");
@@ -34,35 +36,35 @@ const GroupMaster = () => {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/groupmaster/", {
-        GROUP_code: groupCode, // ✅ Match Django field name
-        GROUP_description: groupDescription, // ✅ Match Django field name
+      const response = await axios.post("/api/stockcontrol/groupmaster/", {
+        GROUP_code: groupCode,
+        GROUP_description: groupDescription,
       });
 
       if (response.status === 201 || response.status === 200) {
-        alert("Group saved successfully!");
+        alert("✅ Group saved successfully!");
         setGroupCode("");
         setGroupDescription("");
-        fetchGroups(); // Refresh the list
+        fetchGroups();
       }
-    } catch (error) {
-      console.error("Error saving group:", error);
+    } catch (err) {
+      console.error("❌ Error saving group:", err);
       alert("Failed to save group. Please try again.");
     }
   }, [groupCode, groupDescription, fetchGroups]);
 
-  // Clear form fields (New Group)
+  // 🔧 Clear Form Fields
   const handleNew = useCallback(() => {
     setGroupCode("");
     setGroupDescription("");
   }, []);
 
-  // Load Groups when Component Mounts
+  // 🔧 Load Groups on Mount
   useEffect(() => {
     fetchGroups();
   }, [fetchGroups]);
 
-  // Keyboard Shortcuts
+  // 🔧 Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key.toLowerCase() === "s") {
@@ -84,16 +86,18 @@ const GroupMaster = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleSave, handleNew, navigate]);
 
-  // Filtered Groups for Display
-  const filteredGroups = groups.filter((group) =>
-    searchBy === "code"
-      ? group.GROUP_code?.toLowerCase().includes(search.toLowerCase())
-      : group.GROUP_description?.toLowerCase().includes(search.toLowerCase())
-  );
+  // 🔧 Filtered Groups (Memoized for Performance)
+  const filteredGroups = useMemo(() => {
+    return groups.filter((group) =>
+      searchBy === "code"
+        ? group.GROUP_code?.toLowerCase().includes(search.toLowerCase())
+        : group.GROUP_description?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [groups, search, searchBy]);
 
   return (
     <div className="group-master-container">
-      <div className="title">Group Master</div>
+      <h2 className="title">Group Master</h2>
 
       <div className="group-master-section">
         <h3>Group Master Details</h3>
@@ -112,13 +116,12 @@ const GroupMaster = () => {
             rows="3"
             value={groupDescription}
             onChange={(e) => setGroupDescription(e.target.value)}
-            style={{ resize: "vertical", width: "75%" }}
             placeholder="Enter Group Description"
           ></textarea>
         </div>
         <div className="button-row">
-          <button onClick={handleSave}>Save</button>
-          <button onClick={handleNew}>New</button>
+          <button onClick={handleSave} className="save-btn">Save</button>
+          <button onClick={handleNew} className="new-btn">New</button>
         </div>
       </div>
 
@@ -140,33 +143,39 @@ const GroupMaster = () => {
         </div>
 
         <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Group Code</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredGroups.length > 0 ? (
-                filteredGroups.map((group) => (
-                  <tr key={group.id}>
-                    <td>{group.GROUP_code}</td>
-                    <td>{group.GROUP_description}</td>
-                  </tr>
-                ))
-              ) : (
+          {loading ? (
+            <p>Loading groups...</p>
+          ) : error ? (
+            <p className="error-message">{error}</p>
+          ) : (
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="2">No matching groups found.</td>
+                  <th>Group Code</th>
+                  <th>Description</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredGroups.length > 0 ? (
+                  filteredGroups.map((group) => (
+                    <tr key={group.id}>
+                      <td>{group.GROUP_code}</td>
+                      <td>{group.GROUP_description}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2">No matching groups found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
       <div className="footer-hint">
-        Save = Ctrl+S | New = Ctrl+N | Focus Search = F2 | Exit = Esc
+        <strong>Save = Ctrl+S | New = Ctrl+N | Focus Search = F2 | Exit = Esc</strong>
       </div>
     </div>
   );
