@@ -4,6 +4,7 @@ import GroupMaster from '../components/Group Master/groupMaster';
 import TypeMaster from '../components/Type Master/typeMaster'; 
 import CategoryMaster from '../components/Category Master/categoryMaster';
 import ItemMaster from '../components/Item Master/itemMaster';
+import LocationMaster from '../components/Location Master/LocationMaster';
 
 
 const StockControl = () => {
@@ -19,6 +20,8 @@ const StockControl = () => {
         return <CategoryMaster />;
         case 'Item Master':
         return <ItemMaster />;
+        case 'Location Master':
+          return <LocationMaster/>
       default:
         return <div className="placeholder-message">Select a menu item to continue.</div>;
     }

@@ -1,0 +1,128 @@
+.location-master {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  background-color: #f7f7f7;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.checkbox-group {
+  grid-column: span 2;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  background-color: #f1f1f1;
+  border-radius: 4px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+}
+
+.checkbox-group input {
+  margin-right: 5px;
+}
+
+.button-row {
+  grid-column: span 2;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.button-row button {
+  padding: 8px 25px;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-row button:hover {
+  background-color: #0056b3;
+}
+
+.search-section {
+  margin-top: 25px;
+}
+
+.search-section label {
+  font-weight: bold;
+}
+
+.search-section input {
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.table-section {
+  margin-top: 15px;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+.table-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-section th,
+.table-section td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.footer-hints {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+}
