@@ -16,7 +16,7 @@ const GroupMaster = () => {
   const searchInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // 🔧 Fetch Groups from API
+  //Fetch Groups from API
   const fetchGroups = useCallback(async () => {
   try {
     const response = await axios.get("/api/stockcontrol/groupmaster/");
