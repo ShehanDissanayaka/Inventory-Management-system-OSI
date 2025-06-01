@@ -3,19 +3,28 @@
   padding: 20px;
   max-width: 900px;
   margin: auto;
+  background-color: var(--card-bg);
+  border: 2px solid var(--primary-color);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(30, 136, 229, 0.1);
+  color: var(--text-color);
 }
 
-h2 {
+h2,
+.title {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary-color);
 }
 
 .form-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  background-color: #f7f7f7;
-  border: 1px solid #ccc;
+  background-color: var(--input-bg);
+  border: 1px solid var(--highlight-color);
   border-radius: 8px;
   padding: 20px;
 }
@@ -23,106 +32,195 @@ h2 {
 .form-group {
   display: flex;
   flex-direction: column;
+  margin-bottom: 16px;
 }
 
 .form-group label {
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 6px;
 }
 
 .form-group input,
+.form-group select,
 .form-group textarea {
-  padding: 6px;
+  padding: 10px 12px;
   font-size: 14px;
+  color: var(--text-color);
+  background-color: var(--input-bg);
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary-color);
+  background-color: #e3f2fd;
+  outline: none;
 }
 
 textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 70px;
 }
 
 .checkbox-group {
   grid-column: span 2;
   display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  background-color: #f1f1f1;
-  border-radius: 4px;
+  justify-content: space-between;
+  background-color: var(--input-bg);
+  border: 1px solid var(--highlight-color);
+  border-radius: 6px;
+  padding: 10px 15px;
 }
 
 .checkbox-group label {
   display: flex;
   align-items: center;
-  font-weight: normal;
-}
-
-.checkbox-group input {
-  margin-right: 5px;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--text-color);
 }
 
 .button-row {
   grid-column: span 2;
   display: flex;
   justify-content: center;
-  gap: 30px;
-  margin-top: 10px;
+  gap: 25px;
+  margin-top: 20px;
 }
 
-.button-row button {
-  padding: 8px 25px;
-  font-weight: bold;
-  background-color: #007bff;
+.button-row button,
+.barcode-box button,
+.button-group button {
+  padding: 8px 20px;
+  font-weight: 600;
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.button-row button:hover {
-  background-color: #0056b3;
+.button-row button:hover,
+.barcode-box button:hover,
+.button-group button:hover {
+  background-color: var(--secondary-color);
+}
+
+.bottom-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: 25px;
+  align-items: flex-start;
+}
+
+fieldset {
+  border: 1px solid var(--highlight-color);
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  flex: 1;
+  min-width: 280px;
+}
+
+legend {
+  font-weight: bold;
+  padding: 0 10px;
+  color: var(--primary-color);
 }
 
 .search-section {
-  margin-top: 25px;
+  margin-top: 30px;
 }
 
+.search-section h4,
 .search-section label {
-  font-weight: bold;
+  color: var(--primary-color);
 }
 
 .search-section input {
   width: 100%;
-  padding: 6px;
+  padding: 8px;
   font-size: 14px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
   border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-top: 5px;
+  border-radius: 5px;
+}
+
+.search-section input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  background-color: #e3f2fd;
 }
 
 .table-section {
-  margin-top: 15px;
+  margin-top: 20px;
   max-height: 250px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
+  background-color: var(--input-bg);
+  border-radius: 6px;
 }
 
 .table-section table {
   width: 100%;
   border-collapse: collapse;
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .table-section th,
 .table-section td {
   border: 1px solid #ccc;
-  padding: 8px;
+  padding: 10px;
+  font-size: 14px;
   text-align: left;
+  vertical-align: middle;
 }
 
+.table-section th {
+  background-color: var(--table-header-bg);
+  color: var(--text-color);
+}
+
+.footer-hint,
 .footer-hints {
-  margin-top: 15px;
+  margin-top: 20px;
   font-size: 13px;
   color: #666;
   text-align: center;
+}
+
+/* DARK MODE */
+.dark .form-section,
+.dark .checkbox-group,
+.dark fieldset,
+.dark .table-section,
+.dark .search-section input,
+.dark .form-group input,
+.dark .form-group select,
+.dark .form-group textarea {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+.dark .table-section th {
+  background-color: var(--table-header-bg);
+  color: var(--text-color);
+}
+
+.dark .form-group input:focus,
+.dark .form-group select:focus,
+.dark .form-group textarea:focus,
+.dark .search-section input:focus {
+  background-color: #37474f;
+  border-color: var(--highlight-color);
 }

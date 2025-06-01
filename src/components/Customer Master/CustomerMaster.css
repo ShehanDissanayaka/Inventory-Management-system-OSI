@@ -1,35 +1,39 @@
 .customer-master {
   padding: 20px;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+  background-color: var(--card-bg, #f9f9f9);
+  color: var(--text-color, #000);
 }
 
 h2 {
   text-align: center;
   margin-bottom: 20px;
+  color: var(--primary-color, #1565c0);
 }
 
 .form-grid {
   display: flex;
   gap: 40px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .form-col {
   display: flex;
   flex-direction: column;
   width: 48%;
+  min-width: 280px;
 }
 
 .form-row {
   display: flex;
-  flex-direction: row; /* Change to row to align input and label horizontally */
-  align-items: center; /* Align items vertically */
+  flex-direction: row; /* horizontal label/input */
+  align-items: center;
   margin-bottom: 12px;
+  gap: 12px;
 }
 
 .form-row.double {
-  flex-direction: row;
   gap: 16px;
 }
 
@@ -40,22 +44,36 @@ h2 {
 }
 
 .form-row label {
-  font-weight: 500;
-  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--secondary-color, #1976d2);
+  width: 130px;
+  min-width: 130px;
 }
 
 .form-row input,
 .form-row select,
 .form-row textarea {
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  flex: 1;
+  padding: 7px 10px;
   font-size: 14px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 6px;
+  background-color: var(--input-bg, #fff);
+  color: var(--text-color, #000);
+  transition: border-color 0.3s ease;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  outline: none;
+  border-color: var(--highlight-color, #1976d2);
 }
 
 textarea {
   resize: vertical;
   height: 60px;
+  font-family: inherit;
 }
 
 .form-row.checkbox {
@@ -77,6 +95,16 @@ textarea {
   margin: 0 10px;
   font-size: 14px;
   cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--primary-color, #1976d2);
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.button-row button:hover {
+  background-color: var(--secondary-color, #1565c0);
 }
 
 .search-section {
@@ -85,6 +113,7 @@ textarea {
   gap: 10px;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .table-section {
@@ -100,12 +129,31 @@ textarea {
 .table-section th,
 .table-section td {
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color, #ccc);
   text-align: left;
+  color: var(--text-color, #000);
+}
+
+.table-section th {
+  background-color: var(--table-header-bg, #e3f2fd);
+  color: var(--primary-color, #1565c0);
+  font-weight: 600;
 }
 
 .footer-hints {
   font-size: 12px;
-  color: #555;
+  color: var(--hint-color, #555);
   text-align: center;
+}
+
+/* Toggle Switch remains the same */
+
+/* Light & Dark Themes */
+/* You can keep your existing theme classes or unify via variables */
+
+/* Placeholder style */
+.placeholder-message {
+  font-size: 14px;
+  opacity: 0.6;
+  font-style: italic;
 }
