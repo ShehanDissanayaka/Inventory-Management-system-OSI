@@ -1,7 +1,7 @@
 # stockcontrol/serializers.py
 
 from rest_framework import serializers
-from .models import GroupMaster, TypeMaster, CategoryMaster, ItemLocationMaster 
+from .models import GroupMaster, TypeMaster, CategoryMaster, ItemLocationMaster, Customer, Supplier, ItemMaster
 
 class GroupMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,3 +22,18 @@ class ItemLocationMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemLocationMaster
         fields = '__all__'
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+
+class SupplierSerializer(serializers.ModelSerializer):          # ② NEW
+    class Meta:
+        model  = Supplier
+        fields = '__all__'
+
+class ItemMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = ItemMaster
+        fields = "__all__"

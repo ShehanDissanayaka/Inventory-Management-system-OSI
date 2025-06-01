@@ -1,0 +1,111 @@
+.customer-master {
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+}
+
+.form-col {
+  display: flex;
+  flex-direction: column;
+  width: 48%;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row; /* Change to row to align input and label horizontally */
+  align-items: center; /* Align items vertically */
+  margin-bottom: 12px;
+}
+
+.form-row.double {
+  flex-direction: row;
+  gap: 16px;
+}
+
+.form-row.double > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row label {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+textarea {
+  resize: vertical;
+  height: 60px;
+}
+
+.form-row.checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.form-row.checkbox label {
+  margin-right: 10px;
+}
+
+.button-row {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.button-row button {
+  padding: 8px 18px;
+  margin: 0 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.search-section {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-section {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.table-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-section th,
+.table-section td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.footer-hints {
+  font-size: 12px;
+  color: #555;
+  text-align: center;
+}

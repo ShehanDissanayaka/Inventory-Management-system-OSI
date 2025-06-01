@@ -1,103 +1,139 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+// src/components/ItemMaster/ItemMaster.js
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../../api/axios";   // ← same base instance you use elsewhere
 import "./itemMaster.css";
 
+const blank = {
+  code: "",
+  group: "",
+  type: "",
+  category: "",
+  description: "",
+  uom: "",
+  warranty: "",
+  reorderLevel: 0,
+  reorderQty: 0,
+  minLevel: 0,
+  maxLevel: 0,
+  purchasingPrice: 0,
+  sellingPrice: 0,
+  barcode: "",
+  printQty: 1,
+  active: true,
+  invoicable: false,
+  barcodeAvailable: false,
+};
+
+const API = "/api/stockcontrol/items/";
+
+const toBackend = (f) => ({
+  ITEM_code: f.code,
+  ITEM_group: f.group,
+  ITEM_type: f.type,
+  ITEM_category: f.category,
+  ITEM_description: f.description,
+  ITEM_uom: f.uom,
+  ITEM_warranty: f.warranty,
+  ITEM_reorder_level: f.reorderLevel,
+  ITEM_reorder_qty: f.reorderQty,
+  ITEM_min_level: f.minLevel,
+  ITEM_max_level: f.maxLevel,
+  ITEM_purchase_price: f.purchasingPrice,
+  ITEM_normal_selling_price: f.sellingPrice,
+  ITEM_has_barcode: f.barcodeAvailable,
+  ITEM_barcode: f.barcode,
+  ITEM_invoicable: f.invoicable,
+  ITEM_active: f.active,
+});
+
+const fromBackend = (it) => ({
+  id: it.id,
+  code: it.ITEM_code,
+  description: it.ITEM_description,
+});
+
 const ItemMaster = () => {
-    const [formData, setFormData] = useState({
-        code: "",
-        group: "",
-        type: "",
-        category: "",
-        description: "",
-        uom: "",
-        warranty: "",
-        reorderLevel: 0,
-        reorderQty: 0,
-        minLevel: 0,
-        maxLevel: 0,
-        purchasingPrice: 0.0,
-        sellingPrice: 0.0,
-        barcode: "",
-        printQty: 1,
-        active: true,
-        invoicable: false,
-        barcodeAvailable: false,
-    });
+  const [form, setForm]         = useState(blank);
+  const [items, setItems]       = useState([]);
+  const [search, setSearch]     = useState("");
+  const codeInputRef            = useRef(null);
+  const navigate                = useNavigate();
 
-    const navigate = useNavigate();
-    const codeInputRef = useRef(null);
+  /* ---------- fetch list ---------- */
+  const fetchItems = useCallback(async () => {
+    try {
+      const res = await axios.get(API);
+      setItems(res.data.map(fromBackend));
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching items");
+    }
+  }, []);
 
-    const resetForm = () => {
-        setFormData({
-            code: "",
-            group: "",
-            type: "",
-            category: "",
-            description: "",
-            uom: "",
-            warranty: "",
-            reorderLevel: 0,
-            reorderQty: 0,
-            minLevel: 0,
-            maxLevel: 0,
-            purchasingPrice: 0.0,
-            sellingPrice: 0.0,
-            barcode: "",
-            printQty: 1,
-            active: true,
-            invoicable: false,
-            barcodeAvailable: false,
-        });
-    };
+  useEffect(() => { fetchItems(); }, [fetchItems]);
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
-    };
+  /* ---------- handlers ---------- */
+  const onChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
+  };
 
-    const handleSave = useCallback(() => {
-        console.log("Saved:", formData);
-        alert("Item saved successfully!");
+  const resetForm = () => setForm(blank);
+
+  const saveItem = useCallback(async () => {
+    try {
+      const res = await axios.post(API, toBackend(form));
+      if (res.status === 201) {
+        alert("Item saved!");
         resetForm();
-    }, [formData]);
+        fetchItems();
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        let msg = "Error:\n";
+        for (let k in data) msg += `${k}: ${data[k]}\n`;
+        alert(msg);
+      } else {
+        alert("Unknown error saving item");
+      }
+    }
+  }, [form, fetchItems]);
 
-    const handleRemove = () => {
-        if (formData.code) {
-            alert(`Item "${formData.code}" removed.`);
-            resetForm();
-        } else {
-            alert("No item code provided to remove.");
-        }
+  const removeItem = () => {
+    if (!form.code) return alert("Enter a code to remove.");
+    alert("Remove not implemented (demo).");
+  };
+
+  const printBarcode = () => {
+    if (!form.barcodeAvailable) return alert("Barcode not available.");
+    alert(`Printing ${form.barcode} – Qty ${form.printQty}`);
+  };
+
+  /* ---------- shortcuts ---------- */
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === "s") { e.preventDefault(); saveItem(); }
+      else if (e.ctrlKey && e.key.toLowerCase() === "n") { e.preventDefault(); resetForm(); }
+      else if (e.key === "F2") { e.preventDefault(); codeInputRef.current?.focus(); }
+      else if (e.key === "Escape") { e.preventDefault(); navigate("/stockcontrol"); }
     };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [saveItem, navigate]);
 
-    const handlePrint = () => {
-        if (formData.barcodeAvailable) {
-            alert(`Printing Barcode: ${formData.barcode}\nQty: ${formData.printQty}`);
-        } else {
-            alert("Barcode not available.");
-        }
-    };
-
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === "s") {
-                e.preventDefault();
-                handleSave();
-            } else if (e.ctrlKey && e.key.toLowerCase() === "n") {
-                e.preventDefault();
-                resetForm();
-            } else if (e.key === "F2") {
-                e.preventDefault();
-                codeInputRef.current?.focus();
-            } else if (e.key === "Escape") {
-                e.preventDefault();
-                navigate("/stockcontrol");
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [handleSave, navigate]);
+  /* ---------- search ---------- */
+  const filtered = useMemo(
+    () =>
+      items.filter(
+        (i) =>
+          i.code.toLowerCase().includes(search.toLowerCase()) ||
+          i.description?.toLowerCase().includes(search.toLowerCase())
+      ),
+    [items, search]
+  );
 
     return (
         <div className="item-master-container">
@@ -109,19 +145,19 @@ const ItemMaster = () => {
                         <label>Code</label>
                         <input
                             name="code"
-                            value={formData.code}
-                            onChange={handleChange}
+                            value={form.code}
+                            onChange={onChange}
                             ref={codeInputRef}
                         />
                     </div>
 
                     <div className="row">
                         <label>Group</label>
-                        <select name="group" value={formData.group} onChange={handleChange}>
+                        <select name="group" value={form.group} onChange={onChange}>
                             <option value="">Select</option>
                         </select>
                         <label>Type</label>
-                        <select name="type" value={formData.type} onChange={handleChange}>
+                        <select name="type" value={form.type} onChange={onChange}>
                             <option value="">Select</option>
                         </select>
                     </div>
@@ -131,8 +167,8 @@ const ItemMaster = () => {
                         <textarea
                             name="description"
                             rows="3"
-                            value={formData.description}
-                            onChange={handleChange}
+                            value={form.description}
+                            onChange={onChange}
                         />
                     </div>
 
@@ -141,15 +177,15 @@ const ItemMaster = () => {
                         <input
                             type="number"
                             name="reorderLevel"
-                            value={formData.reorderLevel}
-                            onChange={handleChange}
+                            value={form.reorderLevel}
+                            onChange={onChange}
                         />
                         <label>Re-order QTY</label>
                         <input
                             type="number"
                             name="reorderQty"
-                            value={formData.reorderQty}
-                            onChange={handleChange}
+                            value={form.reorderQty}
+                            onChange={onChange}
                         />
                     </div>
 
@@ -158,15 +194,15 @@ const ItemMaster = () => {
                         <input
                             type="number"
                             name="minLevel"
-                            value={formData.minLevel}
-                            onChange={handleChange}
+                            value={form.minLevel}
+                            onChange={onChange}
                         />
                         <label>Max Level</label>
                         <input
                             type="number"
                             name="maxLevel"
-                            value={formData.maxLevel}
-                            onChange={handleChange}
+                            value={form.maxLevel}
+                            onChange={onChange}
                         />
                     </div>
                 </div>
@@ -177,15 +213,15 @@ const ItemMaster = () => {
                             <input
                                 type="checkbox"
                                 name="active"
-                                checked={formData.active}
-                                onChange={handleChange}
+                                checked={form.active}
+                                onChange={onChange}
                             />
                             Active
                             <input
                                 type="checkbox"
                                 name="invoicable"
-                                checked={formData.invoicable}
-                                onChange={handleChange}
+                                checked={form.invoicable}
+                                onChange={onChange}
                             />
                             Invoicable
                         </label>
@@ -194,21 +230,21 @@ const ItemMaster = () => {
 
                     <div className="inline-field">
                         <label>Category</label>
-                        <select name="category" value={formData.category} onChange={handleChange}>
+                        <select name="category" value={form.category} onChange={onChange}>
                             <option value="">Select</option>
                         </select>
                     </div>
 
                     <div className="inline-field">
                         <label>UOM</label>
-                        <select name="uom" value={formData.uom} onChange={handleChange}>
+                        <select name="uom" value={form.uom} onChange={onChange}>
                             <option value="">Select</option>
                         </select>
                     </div>
 
                     <div className="inline-field">
                         <label>Warranty</label>
-                        <select name="warranty" value={formData.warranty} onChange={handleChange}>
+                        <select name="warranty" value={form.warranty} onChange={onChange}>
                             <option value="">Select</option>
                         </select>
                     </div>
@@ -223,8 +259,8 @@ const ItemMaster = () => {
                         <input
                             type="number"
                             name="purchasingPrice"
-                            value={formData.purchasingPrice}
-                            onChange={handleChange}
+                            value={form.purchasingPrice}
+                            onChange={onChange}
                         />
                     </div>
                     <div className="row">
@@ -232,8 +268,8 @@ const ItemMaster = () => {
                         <input
                             type="number"
                             name="sellingPrice"
-                            value={formData.sellingPrice}
-                            onChange={handleChange}
+                            value={form.sellingPrice}
+                            onChange={onChange}
                         />
                     </div>
                 </fieldset>
@@ -244,8 +280,8 @@ const ItemMaster = () => {
                             <input
                                 type="checkbox"
                                 name="barcodeAvailable"
-                                checked={formData.barcodeAvailable}
-                                onChange={handleChange}
+                                checked={form.barcodeAvailable}
+                                onChange={onChange}
                             />
                             Barcode Available
                         </label>
@@ -255,8 +291,8 @@ const ItemMaster = () => {
                         <label>Barcode</label>
                         <input
                             name="barcode"
-                            value={formData.barcode}
-                            onChange={handleChange}
+                            value={form.barcode}
+                            onChange={onChange}
                         />
                     </div>
 
@@ -265,19 +301,19 @@ const ItemMaster = () => {
                         <input
                             type="number"
                             name="printQty"
-                            value={formData.printQty}
-                            onChange={handleChange}
+                            value={form.printQty}
+                            onChange={onChange}
                         />
                     </div>
 
-                    <button type="button" onClick={handlePrint}>Print</button>
+                    <button type="button" onClick={printBarcode}>Print</button>
                 </fieldset>
             </div>
 
             <div className="button-group">
-                <button onClick={handleSave}>Save</button>
+                <button onClick={saveItem}>Save</button>
                 <button onClick={resetForm}>New</button>
-                <button onClick={handleRemove}>Remove</button>
+                <button onClick={removeItem}>Remove</button>
             </div>
 
             <div className="search-section">
