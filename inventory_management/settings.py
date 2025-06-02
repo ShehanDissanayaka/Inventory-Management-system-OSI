@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-=w04iw5zb90o&!s=b&bp5nn-4=jcy-801x9idbx8(&c+&!+r%_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['your-backend.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['osiinventory-backend.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -132,3 +132,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://osiinventory.netlify.app",
 ]
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+
