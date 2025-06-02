@@ -5,135 +5,194 @@ import axios from "../../api/axios";   // ← same base instance you use elsewhe
 import "./itemMaster.css";
 
 const blank = {
-  code: "",
-  group: "",
-  type: "",
-  category: "",
-  description: "",
-  uom: "",
-  warranty: "",
-  reorderLevel: 0,
-  reorderQty: 0,
-  minLevel: 0,
-  maxLevel: 0,
-  purchasingPrice: 0,
-  sellingPrice: 0,
-  barcode: "",
-  printQty: 1,
-  active: true,
-  invoicable: false,
-  barcodeAvailable: false,
+    code: "",
+    group: "",
+    type: "",
+    category: "",
+    description: "",
+    uom: "",
+    warranty: "",
+    reorderLevel: 0,
+    reorderQty: 0,
+    minLevel: 0,
+    maxLevel: 0,
+    purchasingPrice: 0,
+    sellingPrice: 0,
+    barcode: "",
+    printQty: 1,
+    active: true,
+    invoicable: false,
+    barcodeAvailable: false,
 };
 
 const API = "/api/stockcontrol/items/";
 
 const toBackend = (f) => ({
-  ITEM_code: f.code,
-  ITEM_group: f.group,
-  ITEM_type: f.type,
-  ITEM_category: f.category,
-  ITEM_description: f.description,
-  ITEM_uom: f.uom,
-  ITEM_warranty: f.warranty,
-  ITEM_reorder_level: f.reorderLevel,
-  ITEM_reorder_qty: f.reorderQty,
-  ITEM_min_level: f.minLevel,
-  ITEM_max_level: f.maxLevel,
-  ITEM_purchase_price: f.purchasingPrice,
-  ITEM_normal_selling_price: f.sellingPrice,
-  ITEM_has_barcode: f.barcodeAvailable,
-  ITEM_barcode: f.barcode,
-  ITEM_invoicable: f.invoicable,
-  ITEM_active: f.active,
+    ITEM_code: f.code,
+    ITEM_group: f.group,
+    ITEM_type: f.type,
+    ITEM_category: f.category,
+    ITEM_description: f.description,
+    ITEM_uom: f.uom,
+    ITEM_warranty: f.warranty,
+    ITEM_reorder_level: f.reorderLevel,
+    ITEM_reorder_qty: f.reorderQty,
+    ITEM_min_level: f.minLevel,
+    ITEM_max_level: f.maxLevel,
+    ITEM_purchase_price: f.purchasingPrice,
+    ITEM_normal_selling_price: f.sellingPrice,
+    ITEM_has_barcode: f.barcodeAvailable,
+    ITEM_barcode: f.barcode,
+    ITEM_invoicable: f.invoicable,
+    ITEM_active: f.active,
 });
 
 const fromBackend = (it) => ({
-  id: it.id,
-  code: it.ITEM_code,
-  description: it.ITEM_description,
+    id: it.id,
+    code: it.ITEM_code,
+    description: it.ITEM_description,
 });
 
 const ItemMaster = () => {
-  const [form, setForm]         = useState(blank);
-  const [items, setItems]       = useState([]);
-  const [search, setSearch]     = useState("");
-  const codeInputRef            = useRef(null);
-  const navigate                = useNavigate();
+    const [form, setForm] = useState(blank);
+    const [items, setItems] = useState([]);
+    const [search, setSearch] = useState("");
+    const codeInputRef = useRef(null);
+    const navigate = useNavigate();
 
-  /* ---------- fetch list ---------- */
-  const fetchItems = useCallback(async () => {
-    try {
-      const res = await axios.get(API);
-      setItems(res.data.map(fromBackend));
-    } catch (err) {
-      console.error(err);
-      alert("Error fetching items");
-    }
-  }, []);
+    /* ---------- fetch list ---------- */
+    const fetchItems = useCallback(async () => {
+        try {
+            const res = await axios.get(API);
+            setItems(res.data.map(fromBackend));
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching items");
+        }
+    }, []);
 
-  useEffect(() => { fetchItems(); }, [fetchItems]);
+    useEffect(() => { fetchItems(); }, [fetchItems]);
 
-  /* ---------- handlers ---------- */
-  const onChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
-  };
+    /* ------------from select in the groupmaster-------- */
+    const [groupOptions, setGroupOptions] = useState([]);
 
-  const resetForm = () => setForm(blank);
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const response = await axios.get("/api/stockcontrol/groupmaster/");
+                setGroupOptions(response.data); // response should be an array of { GROUP_code, GROUP_description }
+            } catch (error) {
+                console.error("Error fetching group codes:", error);
+                alert("Failed to fetch group codes");
+            }
+        };
 
-  const saveItem = useCallback(async () => {
-    try {
-      const res = await axios.post(API, toBackend(form));
-      if (res.status === 201) {
-        alert("Item saved!");
-        resetForm();
-        fetchItems();
-      }
-    } catch (err) {
-      console.error(err);
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        let msg = "Error:\n";
-        for (let k in data) msg += `${k}: ${data[k]}\n`;
-        alert(msg);
-      } else {
-        alert("Unknown error saving item");
-      }
-    }
-  }, [form, fetchItems]);
+        fetchGroups();
+    }, []);
 
-  const removeItem = () => {
-    if (!form.code) return alert("Enter a code to remove.");
-    alert("Remove not implemented (demo).");
-  };
+    /* -------from select in the typeMaster------ */
 
-  const printBarcode = () => {
-    if (!form.barcodeAvailable) return alert("Barcode not available.");
-    alert(`Printing ${form.barcode} – Qty ${form.printQty}`);
-  };
+    const [typeOptions, setTypeOptions] = useState([]);
 
-  /* ---------- shortcuts ---------- */
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.ctrlKey && e.key.toLowerCase() === "s") { e.preventDefault(); saveItem(); }
-      else if (e.ctrlKey && e.key.toLowerCase() === "n") { e.preventDefault(); resetForm(); }
-      else if (e.key === "F2") { e.preventDefault(); codeInputRef.current?.focus(); }
-      else if (e.key === "Escape") { e.preventDefault(); navigate("/stockcontrol"); }
+    useEffect(() => {
+        const fetchTypes = async () => {
+            try {
+                const res = await axios.get("/api/stockcontrol/typemaster/");
+                setTypeOptions(res.data);              // [{ TYPE_code, TYPE_description, … }]
+            } catch (err) {
+                console.error("Error loading types:", err);
+                alert("Failed to load types");
+            }
+        };
+
+        fetchTypes();
+    }, []);
+
+    /* -------from select in the Categorymaster------ */
+
+    const [categoryOptions, setCategoryOptions] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await axios.get("/api/stockcontrol/categorymaster/");
+                setCategoryOptions(res.data); // [{ CATEGORY_code, CATEGORY_description, ... }]
+            } catch (err) {
+                console.error("Error loading categories:", err);
+                alert("Failed to load categories");
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+
+
+    /* ---------- handlers ---------- */
+    const onChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [saveItem, navigate]);
 
-  /* ---------- search ---------- */
-  const filtered = useMemo(
-    () =>
-      items.filter(
-        (i) =>
-          i.code.toLowerCase().includes(search.toLowerCase()) ||
-          i.description?.toLowerCase().includes(search.toLowerCase())
-      ),
-    [items, search]
-  );
+    const resetForm = () => setForm(blank);
+
+    const saveItem = useCallback(async () => {
+        try {
+            const res = await axios.post(API, toBackend(form));
+            if (res.status === 201) {
+                alert("Item saved!");
+                resetForm();
+                fetchItems();
+            }
+        } catch (err) {
+            console.error(err);
+            if (err.response && err.response.data) {
+                const data = err.response.data;
+                let msg = "Error:\n";
+                for (let k in data) msg += `${k}: ${data[k]}\n`;
+                alert(msg);
+            } else {
+                alert("Unknown error saving item");
+            }
+        }
+    }, [form, fetchItems]);
+
+    const removeItem = () => {
+        if (!form.code) return alert("Enter a code to remove.");
+        alert("Remove not implemented (demo).");
+    };
+
+    const printBarcode = () => {
+        if (!form.barcodeAvailable) return alert("Barcode not available.");
+        alert(`Printing ${form.barcode} – Qty ${form.printQty}`);
+    };
+
+    /* ---------- shortcuts ---------- */
+    useEffect(() => {
+        const onKey = (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === "s") { e.preventDefault(); saveItem(); }
+            else if (e.ctrlKey && e.key.toLowerCase() === "n") { e.preventDefault(); resetForm(); }
+            else if (e.key === "F2") { e.preventDefault(); codeInputRef.current?.focus(); }
+            else if (e.key === "Escape") { e.preventDefault(); navigate("/stockcontrol"); }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [saveItem, navigate]);
+
+    /* ---------- search ---------- */
+    const [searchCode, setSearchCode] = useState("");
+    const [searchDesc, setSearchDesc] = useState("");
+
+    // …and update `filtered`:
+    const filtered = useMemo(
+        () =>
+            items.filter(
+                i =>
+                    i.code.toLowerCase().includes(searchCode.toLowerCase()) &&
+                    i.description?.toLowerCase().includes(searchDesc.toLowerCase())
+            ),
+        [items, searchCode, searchDesc]
+    );
 
     return (
         <div className="item-master-container">
@@ -152,13 +211,26 @@ const ItemMaster = () => {
                     </div>
 
                     <div className="row">
+
                         <label>Group</label>
                         <select name="group" value={form.group} onChange={onChange}>
                             <option value="">Select</option>
+                            {groupOptions.map((g) => (
+                                <option key={g.GROUP_code} value={g.GROUP_code}>
+                                    {g.GROUP_code} - {g.GROUP_description}
+                                </option>
+                            ))}
                         </select>
+
+
                         <label>Type</label>
                         <select name="type" value={form.type} onChange={onChange}>
                             <option value="">Select</option>
+                            {typeOptions.map(t => (
+                                <option key={t.TYPE_code} value={t.TYPE_code}>
+                                    {t.TYPE_code} - {t.TYPE_description}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
@@ -232,13 +304,29 @@ const ItemMaster = () => {
                         <label>Category</label>
                         <select name="category" value={form.category} onChange={onChange}>
                             <option value="">Select</option>
+                            {categoryOptions.map((cat) => (
+                                <option key={cat.CATEGORY_code} value={cat.CATEGORY_code}>
+                                    {cat.CATEGORY_code} - {cat.CATEGORY_description}
+                                </option>
+                            ))}
                         </select>
+
                     </div>
 
                     <div className="inline-field">
                         <label>UOM</label>
                         <select name="uom" value={form.uom} onChange={onChange}>
                             <option value="">Select</option>
+                            <option value="1">Liters(L)</option>
+                            <option value="2">Milliliters(mL)</option>
+                            <option value="3">Kilograms(kg)</option>
+                            <option value="4">Grams(g)</option>
+                            <option value="5">Millimeters(m)</option>
+                            <option value="6">meters(m)</option>
+                            <option value="7">Inches(in)</option>
+                            <option value="8">feet(ft)</option>
+                            <option value="9">yards(yd)</option>
+                            <option value="10">Units</option>
                         </select>
                     </div>
 
@@ -246,6 +334,8 @@ const ItemMaster = () => {
                         <label>Warranty</label>
                         <select name="warranty" value={form.warranty} onChange={onChange}>
                             <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="2">No</option>
                         </select>
                     </div>
                 </div>
@@ -319,9 +409,18 @@ const ItemMaster = () => {
             <div className="search-section">
                 <h4>Item Search</h4>
                 <div className="row">
-                    <input placeholder="Code" />
-                    <input placeholder="Description" />
+                    <input
+                        placeholder="Code"
+                        value={searchCode}
+                        onChange={e => setSearchCode(e.target.value)}
+                    />
+                    <input
+                        placeholder="Description"
+                        value={searchDesc}
+                        onChange={e => setSearchDesc(e.target.value)}
+                    />
                 </div>
+                
                 <table>
                     <thead>
                         <tr>
@@ -330,12 +429,23 @@ const ItemMaster = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>001</td>
-                            <td>Sample Group</td>
-                        </tr>
+                        {filtered.length ? (
+                            filtered.map(it => (
+                                <tr key={it.id}>
+                                    <td>{it.code}</td>
+                                    <td>{it.description}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="2" style={{ textAlign: "center" }}>
+                                    No matching items
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
+
             </div>
 
             <div className="footer-hint">
