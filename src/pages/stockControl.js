@@ -9,7 +9,7 @@ import ItemMaster from '../components/Item Master/itemMaster';
 import LocationMaster from '../components/Location Master/LocationMaster';
 import CustomerMaster from '../components/Customer Master/CustomerMaster';
 import SupplierMaster from '../components/Supplier Master/SupplierMaster';
-
+import GoodsReceivedNote from '../components/Goods Received Note/GoodsReceivedNote';
 const StockControl = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [darkMode, setDarkMode] = useState(true);
@@ -24,6 +24,7 @@ const StockControl = () => {
         case 'Location Master': return <LocationMaster />;
         case 'Customer Master': return <CustomerMaster />;
         case 'Supplier Master': return <SupplierMaster />;
+        case 'GRN': return <GoodsReceivedNote />
         default: return <div className="placeholder-message">Select a menu item to continue.</div>;
       }
     })();
@@ -84,8 +85,8 @@ const StockControl = () => {
             <ul>
               {[
                 'Group Master', 'Type Master', 'Category Master', 'Location Master',
-                'Item Master', 'Rep Master', 'Supplier Master', 'Customer Master',
-                'Supplier Group', 'Customer Group', 'Title Master', 'Area Master',
+                'Item Master', 'Rep Master', 'GRN', 'Supplier Master', 'Customer Master',
+                'Good Recieved Note', 'Customer Group', 'Title Master', 'Area Master',
                 'Credit Card Bank'
               ].map((item) => (
                 <li

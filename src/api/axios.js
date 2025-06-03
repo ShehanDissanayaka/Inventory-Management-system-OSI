@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-baseURL: "https://osiinventory-backend.onrender.com/api",
+  baseURL: "http://127.0.0.1:8000", // Base API URL
   headers: {
     "Content-Type": "application/json",
   },
